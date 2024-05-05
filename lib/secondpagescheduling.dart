@@ -332,7 +332,13 @@ class TeamTable extends StatelessWidget {
               // Added SingleChildScrollView here
               child: DataTable(
                 columns: [
-                  DataColumn(label: Text('Officer Names:')),
+                  DataColumn(
+                      label: Text(
+                    'Officer Names:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )),
                 ],
                 rows: team.members
                     .map(
@@ -363,29 +369,59 @@ class TeamDialog extends StatefulWidget {
 
 class _TeamDialogState extends State<TeamDialog> {
   late TextEditingController _nameController;
-  late TextEditingController _membersController;
+  List<String> _officerNames = [
+    'Officer Adams',
+    'Officer Baker',
+    'Officer Clark',
+    'Officer Davis',
+    'Officer Evans',
+    'Officer Ian',
+    'Officer Mark',
+    'Officer Hans',
+    'Officer James',
+    'Officer Junas',
+    'Officer Ceidner',
+    'Officer Bordz',
+    'Officer Gae',
+    'Officer Jason',
+    'Officer Arht',
+    'Officer Jimmuel',
+    'Officer Cris',
+    'Officer Test',
+    'Officer Test1',
+    'Officer Test2',
+    // Add more names as needed
+  ];
+  List<String> _selectedOfficers = []; // List to hold selected officers
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _membersController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _membersController.dispose();
     super.dispose();
+  }
+
+  void _onOfficerSelected(bool selected, String officerName) {
+    setState(() {
+      if (selected) {
+        _selectedOfficers.add(officerName);
+      } else {
+        _selectedOfficers.remove(officerName);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
-        width: 400, // Adjust width here
-        height: 300, // Adjust height here
-        padding: EdgeInsets.all(16),
+        width: 450,
+        height: 600,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -403,14 +439,21 @@ class _TeamDialogState extends State<TeamDialog> {
                 labelText: 'Team Name',
               ),
             ),
-            SizedBox(height: 8),
-            TextFormField(
-              controller: _membersController,
-              decoration: InputDecoration(
-                labelText: 'Members (comma-separated)',
+            Expanded(
+              child: ListView(
+                children: _officerNames.map((officerName) {
+                  return CheckboxListTile(
+                    title: Text(officerName),
+                    value: _selectedOfficers.contains(officerName),
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        _onOfficerSelected(value, officerName);
+                      }
+                    },
+                  );
+                }).toList(),
               ),
             ),
-            SizedBox(height: 20),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -424,11 +467,8 @@ class _TeamDialogState extends State<TeamDialog> {
                 ElevatedButton(
                   onPressed: () {
                     final teamName = _nameController.text;
-                    final members = _membersController.text
-                        .split(',')
-                        .map((e) => e.trim())
-                        .toList();
-                    final team = Team(name: teamName, members: members);
+                    final team =
+                        Team(name: teamName, members: _selectedOfficers);
                     widget.onCreate(team);
                     Navigator.of(context).pop();
                   },

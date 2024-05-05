@@ -3,10 +3,37 @@ import 'package:facility/frontpagescheduling.dart';
 import 'package:facility/main.dart';
 import 'package:facility/settingsfacility.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends StatefulWidget {
+  @override
+  _EditProfilePageState createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  File? _image;
+
+  Future<void> _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      String filePath = result.files.single.path!;
+      File file = File(filePath);
+      setState(() {
+        _image = file;
+      });
+      print('Image path: $filePath'); // Debug print
+    } else {
+      print('No image selected.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('Image: $_image');
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
@@ -233,21 +260,28 @@ class EditProfilePage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.account_circle,
-                      size: 100,
-                      color: Colors.grey[400],
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                          _image != null ? FileImage(_image!) : null,
+                      child: _image == null
+                          ? Icon(
+                              Icons.account_circle,
+                              size: 100,
+                              color: Colors.grey[400],
+                            )
+                          : null,
                     ),
                     SizedBox(width: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            // Handle Upload Profile Picture
-                          },
+                          onPressed: _pickImage,
                           child: Text('Upload Profile Picture'),
                         ),
+                        if (_image != null) // Show image path for debugging
+                          Text('Image Path: ${_image!.path}'),
                       ],
                     ),
                   ],
